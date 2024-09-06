@@ -1,7 +1,8 @@
 # Globals and input args
 FROM python:3.12.5-alpine3.20
 WORKDIR /app
-
+# CVE-2024-45490, CVE-2024-45491, CVE-2024-45492
+RUN apk --no-cache upgrade libexpat
 # Prepare our app requirements and install it...
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt && \
