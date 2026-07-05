@@ -39,7 +39,15 @@ def getEmojiFromSeverity(severity):
 
 # Default webhook (paste yours here if you want to not have to provide it on the CLI)
 SLACK_WEBHOOK_URL = os.getenv('SLACK_WEBHOOK_URL', "")
+# Alternative to the webhook: a Slack app Bot User OAuth Token (xoxb-...) used with chat.postMessage
+SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN', "")
+SLACK_API_URL = "https://slack.com/api/chat.postMessage"
 SLACK_CHANNEL = os.getenv('SLACK_CHANNEL', "devops")
+
+# Whether any Slack notification method is configured
+def isEnabled():
+    return (len(SLACK_WEBHOOK_URL) > 0 and SLACK_WEBHOOK_URL != "REPLACEME") or \
+           (len(SLACK_BOT_TOKEN) > 0 and SLACK_BOT_TOKEN != "REPLACEME")
 
 # Slack message prefix/suffixes
 SLACK_MESSAGE_PREFIX = os.getenv('SLACK_MESSAGE_PREFIX', "")
@@ -59,9 +67,11 @@ or \n\
 
 def send(body, username="Kubernetes Volume Autoscaler", severity="info", channel=SLACK_CHANNEL, emoji="", iconurl="https://raw.githubusercontent.com/DevOps-Nirvana/Kubernetes-Volume-Autoscaler/master/icon.png", verbose=False):
 
-    # Skip if not set or set invalidly
-    if not SLACK_WEBHOOK_URL or len(SLACK_WEBHOOK_URL) == 0 or SLACK_WEBHOOK_URL == "REPLACEME":
-        print("Slack webhook URL not set, skipping")
+    # Skip if neither notification method is configured
+    use_bot_token = len(SLACK_BOT_TOKEN) > 0 and SLACK_BOT_TOKEN != "REPLACEME"
+    use_webhook = len(SLACK_WEBHOOK_URL) > 0 and SLACK_WEBHOOK_URL != "REPLACEME"
+    if not use_bot_token and not use_webhook:
+        print("Slack webhook URL / bot token not set, skipping")
         return False
 
     # lowercase our severity since thats our standard
@@ -86,7 +96,33 @@ def send(body, username="Kubernetes Volume Autoscaler", severity="info", channel
     # Prefix body if error
     if severity == 'error': payload['text'] = "<!channel> ERROR: " + payload['text']
 
-    # Send the request to Slack
+    # Prefer the bot token / Web API method when configured
+    if use_bot_token:
+        try:
+            rawpayload = json.dumps(payload).encode('utf-8')
+            if verbose:     print("VERBOSE: Sending request to " + SLACK_API_URL + "...")
+            request = urllib.request.Request(
+                SLACK_API_URL,
+                rawpayload,
+                {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Content-Length': len(rawpayload),
+                    'Authorization': 'Bearer ' + SLACK_BOT_TOKEN,
+                }
+            )
+            response = urllib.request.urlopen(request)
+            result = json.loads(response.read())
+            if result.get('ok'):
+                if verbose: print("Sent successfully")
+                return True
+            else:
+                if verbose: print("Error while sending: {}".format(result.get('error', result)))
+                return False
+        except Exception as e:
+            if verbose:     print("Error while sending: {}".format(e))
+            return False
+
+    # Send the request to Slack via a classic incoming webhook
     try:
         rawpayload = json.dumps(payload).encode('utf-8')
         if verbose:         print("VERBOSE: Sending request to " + SLACK_WEBHOOK_URL + "...")

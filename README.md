@@ -334,8 +334,9 @@ The following environment variables are settable during development to alter the
 |------------------------|----------------|-------------|
 | INTERVAL_TIME          | 60             | How often (in seconds) to scan Prometheus for checking if we need to resize |
 | SCALE_ABOVE_PERCENT    | 80             | What percent out of 100 the volume must be consuming before considering to scale it |
-| SLACK_WEBHOOK          |                | A Slack webhook to automatically send alerts to upon resizing |
-| SLACK_CHANNEL          | devops         | The default Slack channel to send alerts to (if your webhook is allowed to send to different channels) |
+| SLACK_WEBHOOK_URL      |                | A Slack incoming webhook URL to automatically send alerts to upon resizing |
+| SLACK_BOT_TOKEN        |                | A Slack app Bot User OAuth Token (xoxb-...) to send alerts via the chat.postMessage API instead of a webhook. Takes precedence over SLACK_WEBHOOK_URL if both are set. Requires the `chat:write` scope and the bot invited to SLACK_CHANNEL |
+| SLACK_CHANNEL          | devops         | The default Slack channel to send alerts to (if your webhook is allowed to send to different channels, or required when using SLACK_BOT_TOKEN) |
 | SLACK_MESSAGE_PREFIX   |                | A prefix added to every Slack message send, to alert or inform you of what cluster it is on |
 | SLACK_MESSAGE_SUFFIX   |                | A suffix added to every Slack message send, to alert or inform you of what cluster it is on |
 | SCALE_AFTER_INTERVALS  | 5              | How many intervals of INTERVAL_TIME a volume must be above SCALE_ABOVE_PERCENT before we scale |

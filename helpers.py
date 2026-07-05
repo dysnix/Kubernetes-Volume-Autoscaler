@@ -150,8 +150,9 @@ def printHeaderAndConfiguration():
     print("     HTTP Timeouts for k8s/prom: {} seconds".format(HTTP_TIMEOUT))
     print("           VictoriaMetrics mode: {}".format("ENABLED" if VICTORIAMETRICS_COMPAT else "disabled"))
     print("X-Scope-OrgID Header for Cortex: {}".format(SCOPE_ORGID_AUTH_HEADER if len(SCOPE_ORGID_AUTH_HEADER) else "disabled"))
-    print(" Sending notifications to Slack: {}".format("ENABLED" if len(slack.SLACK_WEBHOOK_URL) > 0 else "disabled"))
-    if len(slack.SLACK_WEBHOOK_URL) > 0:
+    print(" Sending notifications to Slack: {}".format("ENABLED" if slack.isEnabled() else "disabled"))
+    if slack.isEnabled():
+        print("                    Slack method: {}".format("bot token (chat.postMessage)" if len(slack.SLACK_BOT_TOKEN) > 0 and slack.SLACK_BOT_TOKEN != "REPLACEME" else "incoming webhook"))
         print("                  Slack channel: {}".format(slack.SLACK_CHANNEL))
         print("           Slack message prefix: {}".format(slack.SLACK_MESSAGE_PREFIX))
         print("           Slack message suffix: {}".format(slack.SLACK_MESSAGE_SUFFIX))

@@ -243,7 +243,7 @@ if __name__ == "__main__":
                     print(status_output)
                     # Intentionally skipping sending an event to Kubernetes on success, the above event is enough for now until we detect if resize succeeded
                     # Print success to Slack
-                    if slack.SLACK_WEBHOOK_URL and len(slack.SLACK_WEBHOOK_URL) > 0:
+                    if slack.isEnabled():
                         print(f"Sending slack message to {slack.SLACK_CHANNEL}")
                         slack.send(status_output)
                 else:
@@ -257,7 +257,7 @@ if __name__ == "__main__":
                         message=status_output, type="Warning"
                     )
                     # Print failure to Slack
-                    if slack.SLACK_WEBHOOK_URL and len(slack.SLACK_WEBHOOK_URL) > 0:
+                    if slack.isEnabled():
                         print(f"Sending slack message to {slack.SLACK_CHANNEL}")
                         slack.send(status_output, severity="error")
 

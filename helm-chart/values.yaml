@@ -8,7 +8,10 @@ name: volume-autoscaler
 # This is also how you can run this script remotely (eg: on your local machine to develop this tool against an remote Prometheus server)
 prometheus_url: ""
 # This is how we confiure the Slack integration, set the two values below
+# Either use a classic incoming webhook URL...
 slack_webhook_url: "REPLACEME"
+# ...or a Slack app Bot User OAuth Token (xoxb-...) to send via chat.postMessage instead. If both are set, the bot token takes precedence.
+slack_bot_token: "REPLACEME"
 slack_channel: "REPLACEME"
 # Our slack message prefix and suffix.  Optional, can use to help distinguish between different clusters or to alert someone
 slack_message_prefix: ""
@@ -68,6 +71,8 @@ globalEnvs:
   # This is how we confiure the Slack integration, set the values below
   - name: SLACK_WEBHOOK_URL
     value: "{{ .Values.slack_webhook_url }}"
+  - name: SLACK_BOT_TOKEN
+    value: "{{ .Values.slack_bot_token }}"
   - name: SLACK_CHANNEL
     value: "{{ .Values.slack_channel }}"
   - name: SLACK_MESSAGE_PREFIX
